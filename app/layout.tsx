@@ -5,8 +5,20 @@ import { AuthProvider } from "@/hooks/use-auth"
 import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
+import localFont from "next/font/local"
 
-const inter = Inter({ subsets: ["latin"] })
+// const inter = Inter({ subsets: ["latin"], display: "swap" })
+const inter = localFont({
+  src: [
+    {
+      path: "./fonts/inter-v19-cyrillic_latin-regular.woff2",
+      weight: "400",
+      style: "normal",
+    }
+  ],
+  display: "swap",
+  variable: "--font-inter",
+})
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://saranzafar.vercel.app'),
