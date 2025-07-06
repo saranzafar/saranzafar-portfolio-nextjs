@@ -136,7 +136,7 @@ export default function Portfolio() {
                   <span className="sr-only">Email</span>
                 </Button>
               </Link>
-              <Link href="/admin/blogs">
+              <Link href="/blogs">
                 <Button
                   variant="ghost"
                   size="icon"
@@ -375,7 +375,7 @@ export default function Portfolio() {
                   </div>
                   <div>
                     <div className="text-sm text-zinc-500">Email</div>
-                    <div className="font-medium">hello@example.com</div>
+                    <div className="font-medium">saran.development@gmail.com</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -384,7 +384,7 @@ export default function Portfolio() {
                   </div>
                   <div>
                     <div className="text-sm text-zinc-500">LinkedIn</div>
-                    <div className="font-medium">linkedin.com/in/shinekyawkyawaung</div>
+                    <div className="font-medium">linkedin.com/in/saran-zafar-7b9a581a8</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -393,7 +393,7 @@ export default function Portfolio() {
                   </div>
                   <div>
                     <div className="text-sm text-zinc-500">GitHub</div>
-                    <div className="font-medium">github.com/shinekyawkyawaung</div>
+                    <div className="font-medium">github.com/saranzafar</div>
                   </div>
                 </div>
               </div>
@@ -417,15 +417,15 @@ export default function Portfolio() {
         <div className="container flex flex-col md:flex-row justify-between items-center gap-6">
           <div>
             <Link href="/" className="font-bold text-xl">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">Shine</span>
-              <span className="text-white">KKA</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-600">Saran </span>
+              <span className="text-white">Zafar</span>
             </Link>
             <p className="text-sm text-zinc-500 mt-2">
-              © {new Date().getFullYear()} Shine Kyaw Kyaw Aung. All rights reserved.
+              © {new Date().getFullYear()} Saran Zafar. All rights reserved.
             </p>
           </div>
-          <div className="flex gap-4">
-            <Link href="https://github.com" target="_blank" rel="noopener noreferrer">
+          <div className="flex gap-4 pt-4">
+            <Link href="https://github.com/saranzafar" target="_blank" rel="noopener noreferrer">
               <Button
                 variant="ghost"
                 size="icon"
@@ -435,7 +435,7 @@ export default function Portfolio() {
                 <span className="sr-only">GitHub</span>
               </Button>
             </Link>
-            <Link href="https://www.linkedin.com/in/shinekyawkyawaung/" target="_blank" rel="noopener noreferrer">
+            <Link href="https://www.linkedin.com/in/saran-zafar-7b9a581a8/" target="_blank" rel="noopener noreferrer">
               <Button
                 variant="ghost"
                 size="icon"
@@ -445,17 +445,7 @@ export default function Portfolio() {
                 <span className="sr-only">LinkedIn</span>
               </Button>
             </Link>
-            <Link href="https://twitter.com" target="_blank" rel="noopener noreferrer">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="rounded-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
-              >
-                <Twitter className="h-5 w-5" />
-                <span className="sr-only">Twitter</span>
-              </Button>
-            </Link>
-            <Link href="mailto:hello@example.com">
+            <Link href="mailto:saran.development@gmail.com">
               <Button
                 variant="ghost"
                 size="icon"
@@ -463,6 +453,16 @@ export default function Portfolio() {
               >
                 <Mail className="h-5 w-5" />
                 <span className="sr-only">Email</span>
+              </Button>
+            </Link>
+            <Link href="/blogs">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="rounded-full bg-zinc-800/50 hover:bg-zinc-800 text-zinc-400 hover:text-white"
+              >
+                <Edit className="h-5 w-5" />
+                <span className="sr-only">Admin</span>
               </Button>
             </Link>
           </div>

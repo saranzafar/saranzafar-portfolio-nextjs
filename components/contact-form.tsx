@@ -49,7 +49,7 @@ export function ContactForm() {
               <Input
                 placeholder="Your Name"
                 required
-                className="bg-zinc-900/50 border-zinc-700 focus:border-purple-500 focus:ring-purple-500/20"
+                className="bg-zinc-900/50 border-zinc-700"
               />
             </div>
             <div className="space-y-2">
@@ -57,14 +57,14 @@ export function ContactForm() {
                 type="email"
                 placeholder="Your Email"
                 required
-                className="bg-zinc-900/50 border-zinc-700 focus:border-purple-500 focus:ring-purple-500/20"
+                className="bg-zinc-900/50 border-zinc-700"
               />
             </div>
             <div className="space-y-2">
               <Input
                 placeholder="Subject"
                 required
-                className="bg-zinc-900/50 border-zinc-700 focus:border-purple-500 focus:ring-purple-500/20"
+                className="bg-zinc-900/50 border-zinc-700"
               />
             </div>
             <div className="space-y-2">
@@ -72,7 +72,7 @@ export function ContactForm() {
                 placeholder="Your Message"
                 rows={5}
                 required
-                className="bg-zinc-900/50 border-zinc-700 focus:border-purple-500 focus:ring-purple-500/20"
+                className="bg-zinc-900/50 border-zinc-700"
               />
             </div>
             <Button

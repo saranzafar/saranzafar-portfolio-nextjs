@@ -9,16 +9,38 @@ import localFont from "next/font/local"
 import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // const inter = Inter({ subsets: ["latin"], display: "swap" })
-const inter = localFont({
+
+const poppins = localFont({
   src: [
     {
-      path: "./fonts/inter-v19-cyrillic_latin-regular.woff2",
+      path: "./fonts/poppins/poppins-v23-latin-regular.woff2",
       weight: "400",
       style: "normal",
-    }
+    },
+    {
+      path: "./fonts/poppins/poppins-v23-latin-500.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/poppins/poppins-v23-latin-500italic.woff2",
+      weight: "500",
+      style: "italic",
+    },
+    {
+      path: "./fonts/poppins/poppins-v23-latin-600.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/poppins/poppins-v23-latin-700.woff2",
+      weight: "700",
+      style: "normal",
+    },
+    // add more weights/styles as you like…
   ],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-poppins",
 })
 
 export const metadata: Metadata = {
@@ -65,8 +87,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark antialiased">
-      <body className={inter.className}>
+    <html lang="en" className="dark antialiased scroll-smooth">
+      <body className={poppins.className}>
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
             {children}
