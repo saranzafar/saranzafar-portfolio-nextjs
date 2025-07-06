@@ -6,6 +6,7 @@ import { Inter } from "next/font/google"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import localFont from "next/font/local"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 // const inter = Inter({ subsets: ["latin"], display: "swap" })
 const inter = localFont({
@@ -72,6 +73,7 @@ export default function RootLayout({
             <Toaster />
           </ThemeProvider>
         </AuthProvider>
+        <SpeedInsights />
       </body>
     </html>
   )
