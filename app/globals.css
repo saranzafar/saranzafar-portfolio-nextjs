@@ -53,6 +53,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -62,6 +63,7 @@
   .animation-delay-2000 {
     animation-delay: 2s;
   }
+
   .animation-delay-4000 {
     animation-delay: 4s;
   }
@@ -71,12 +73,15 @@
   0% {
     transform: translate(0px, 0px) scale(1);
   }
+
   33% {
     transform: translate(30px, -50px) scale(1.1);
   }
+
   66% {
     transform: translate(-20px, 20px) scale(0.9);
   }
+
   100% {
     transform: translate(0px, 0px) scale(1);
   }
@@ -84,4 +89,233 @@
 
 .animate-blob {
   animation: blob 7s infinite;
+}
+
+
+/* text editor custom css  */
+/* Add this to your global CSS file or create a new CSS file and import it */
+
+/* MDEditor Dark Theme Fixes */
+.w-md-editor-text-container .w-md-editor-text {
+  color: #e4e4e7 !important;
+  background-color: #18181b !important;
+}
+
+.w-md-editor.w-md-editor-dark .w-md-editor-text-container .w-md-editor-text {
+  background-color: #18181b !important;
+}
+
+/* Fix for ordered lists in MDEditor */
+.w-md-editor-text ol {
+  counter-reset: item;
+  padding-left: 2em;
+}
+
+.w-md-editor-text ol li {
+  display: block;
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.w-md-editor-text ol li:before {
+  content: counter(item) ".";
+  counter-increment: item;
+  position: absolute;
+  left: -1.5em;
+  top: 0;
+  color: #a1a1aa;
+  font-weight: bold;
+}
+
+/* Fix for unordered lists */
+.w-md-editor-text ul {
+  padding-left: 2em;
+}
+
+.w-md-editor-text ul li {
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.w-md-editor-text ul li:before {
+  content: "•";
+  position: absolute;
+  left: -1em;
+  top: 0;
+  color: #a1a1aa;
+  font-weight: bold;
+}
+
+/* Preview styles for lists */
+.w-md-editor-preview ol {
+  counter-reset: item;
+  padding-left: 2em;
+}
+
+.w-md-editor-preview ol li {
+  display: block;
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.w-md-editor-preview ol li:before {
+  content: counter(item) ".";
+  counter-increment: item;
+  position: absolute;
+  left: -1.5em;
+  top: 0;
+  color: #a1a1aa;
+  font-weight: bold;
+}
+
+.w-md-editor-preview ul {
+  padding-left: 2em;
+}
+
+.w-md-editor-preview ul li {
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.w-md-editor-preview ul li:before {
+  content: "•";
+  position: absolute;
+  left: -1em;
+  top: 0;
+  color: #a1a1aa;
+  font-weight: bold;
+}
+
+/* Additional dark theme fixes */
+.w-md-editor.w-md-editor-dark {
+  background-color: #18181b;
+  border-color: #3f3f46;
+}
+
+.w-md-editor.w-md-editor-dark .w-md-editor-bar {
+  background-color: #27272a;
+  border-color: #3f3f46;
+}
+
+.w-md-editor.w-md-editor-dark .w-md-editor-bar svg {
+  fill: #a1a1aa;
+}
+
+.w-md-editor.w-md-editor-dark .w-md-editor-bar button:hover {
+  background-color: #3f3f46;
+}
+
+.w-md-editor.w-md-editor-dark .w-md-editor-bar button:hover svg {
+  fill: #e4e4e7;
+}
+
+/* for blog detail page */
+/* Add this to your global CSS file to fix list rendering in blog detail page */
+
+/* Blog content list styles */
+.prose ol {
+  counter-reset: item;
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.prose ol li {
+  display: block;
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+  color: #d4d4d8;
+}
+
+.prose ol li:before {
+  content: counter(item) ".";
+  counter-increment: item;
+  position: absolute;
+  left: -1.5em;
+  top: 0;
+  color: #a1a1aa;
+  font-weight: bold;
+}
+
+.prose ul {
+  padding-left: 1.5em;
+  margin: 1em 0;
+}
+
+.prose ul li {
+  position: relative;
+  padding-left: 0.5em;
+  margin-bottom: 0.5em;
+  color: #d4d4d8;
+}
+
+.prose ul li:before {
+  content: "•";
+  position: absolute;
+  left: -1em;
+  top: 0;
+  color: #a1a1aa;
+  font-weight: bold;
+}
+
+/* Nested lists */
+.prose ol ol,
+.prose ol ul,
+.prose ul ol,
+.prose ul ul {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+/* Ensure markdown rendered content has proper list styling */
+.prose .wmde-markdown ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+}
+
+.prose .wmde-markdown ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+
+.prose .wmde-markdown li {
+  margin-bottom: 0.5em;
+  color: #d4d4d8;
+}
+
+/* Alternative approach - force list styles */
+.prose [data-color-mode="dark"] ol {
+  list-style-type: decimal !important;
+  padding-left: 1.5em !important;
+}
+
+.prose [data-color-mode="dark"] ul {
+  list-style-type: disc !important;
+  padding-left: 1.5em !important;
+}
+
+.prose [data-color-mode="dark"] li {
+  display: list-item !important;
+  color: #d4d4d8 !important;
+}
+
+/* MDEditor markdown output specific styles */
+.prose .w-md-editor-markdown-color ol {
+  list-style-type: decimal;
+  padding-left: 1.5em;
+}
+
+.prose .w-md-editor-markdown-color ul {
+  list-style-type: disc;
+  padding-left: 1.5em;
+}
+
+.prose .w-md-editor-markdown-color li {
+  display: list-item;
+  margin-bottom: 0.5em;
+  color: #d4d4d8;
 }

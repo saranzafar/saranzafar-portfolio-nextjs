@@ -1,10 +1,10 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Save } from "lucide-react"
+import dynamic from "next/dynamic"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,10 +13,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { RichTextEditor } from "@/components/rich-text-editor"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import { AuthGuard } from "@/components/auth-guard"
 import { AdminHeader } from "@/components/admin-header"
+
+// Dynamically import MDEditor to avoid SSR issues
+const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
 export default function UploadBlogPage() {
   const router = useRouter()
@@ -203,10 +205,28 @@ export default function UploadBlogPage() {
 
                     <div className="space-y-2">
                       <Label>Content *</Label>
-                      <RichTextEditor
-                        value={formData.content}
-                        onChange={(content) => setFormData({ ...formData, content })}
-                      />
+                      <div className="rounded-lg overflow-hidden border border-zinc-700">
+                        <MDEditor
+                          value={formData.content}
+                          onChange={(value) => setFormData({ ...formData, content: value || "" })}
+                          preview="live"
+                          height={400}
+                          data-color-mode="dark"
+                          visibleDragbar={false}
+                          textareaProps={{
+                            placeholder: 'Start writing your blog post...',
+                            style: {
+                              fontSize: 14,
+                              lineHeight: 1.5,
+                              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+                            },
+                          }}
+                          previewOptions={{
+                            rehypePlugins: [],
+                            remarkPlugins: [],
+                          }}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -223,7 +243,7 @@ export default function UploadBlogPage() {
                       <Switch
                         id="published"
                         checked={formData.published}
-                        onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
+                        onCheckedChange={(checked: any) => setFormData({ ...formData, published: checked })}
                       />
                       <Label htmlFor="published">Publish immediately</Label>
                     </div>

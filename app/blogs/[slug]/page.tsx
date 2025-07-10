@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowLeft, Calendar, User, Clock, Tag } from "lucide-react"
+import MDEditor from '@uiw/react-md-editor'
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -41,6 +42,8 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
         .single()
 
       if (error) throw error
+      console.log("Fetched blog data:", data);
+
       setBlog(data)
     } catch (error) {
       console.error("Error fetching blog:", error)
@@ -153,11 +156,16 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
             </div>
           )}
 
-          {/* Content */}
-          <div
-            className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-300 prose-a:text-purple-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-zinc-900 prose-blockquote:border-purple-500"
-            dangerouslySetInnerHTML={{ __html: blog.content }}
-          />
+          {/* Content - Using MDEditor.Markdown for proper markdown rendering */}
+          <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-300 prose-a:text-purple-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-zinc-900 prose-blockquote:border-purple-500 prose-ol:list-decimal prose-ul:list-disc prose-li:text-zinc-300">
+            <MDEditor.Markdown
+              source={blog.content}
+              style={{
+                backgroundColor: 'transparent',
+                color: 'inherit'
+              }}
+            />
+          </div>
 
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-zinc-800">
