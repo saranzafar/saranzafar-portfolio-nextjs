@@ -14,10 +14,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Switch } from "@/components/ui/switch"
 import { Label } from "@/components/ui/label"
 import { useToast } from "@/hooks/use-toast"
-import { RichTextEditor } from "@/components/rich-text-editor"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import { AuthGuard } from "@/components/auth-guard"
 import { AdminHeader } from "@/components/admin-header"
+import dynamic from "next/dynamic"
+
+const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
 export default function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -240,10 +242,28 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
 
                     <div className="space-y-2">
                       <Label>Content *</Label>
-                      <RichTextEditor
-                        value={formData.content}
-                        onChange={(content) => setFormData({ ...formData, content })}
-                      />
+                      <div className="rounded-lg overflow-hidden border border-zinc-700">
+                        <MDEditor
+                          value={formData.content}
+                          onChange={(value) => setFormData({ ...formData, content: value || "" })}
+                          preview="live"
+                          height={400}
+                          data-color-mode="dark"
+                          visibleDragbar={false}
+                          textareaProps={{
+                            placeholder: "Start writing your blog post...",
+                            style: {
+                              fontSize: 14,
+                              lineHeight: 1.5,
+                              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo, monospace',
+                            },
+                          }}
+                          previewOptions={{
+                            rehypePlugins: [],
+                            remarkPlugins: [],
+                          }}
+                        />
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

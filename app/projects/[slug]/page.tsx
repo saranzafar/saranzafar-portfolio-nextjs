@@ -7,6 +7,7 @@ import { ArrowLeft, ExternalLink, Github, Calendar, Tag } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
+import MDEditor from '@uiw/react-md-editor'
 
 interface ProjectDetailPageProps {
   params: Promise<{ slug: string }>
@@ -160,7 +161,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {project.technologies.map((tech: string) => (
-                  <Badge key={tech} variant="secondary" className="bg-zinc-800 hover:bg-zinc-700">
+                  <Badge key={tech} variant="secondary" className="">
                     {tech}
                   </Badge>
                 ))}
@@ -172,10 +173,15 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           {project.content && (
             <div className="mb-8">
               <h3 className="text-2xl font-bold mb-6">Project Details</h3>
-              <div
-                className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-300 prose-a:text-purple-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-zinc-900 prose-blockquote:border-purple-500"
-                dangerouslySetInnerHTML={{ __html: project.content }}
-              />
+              <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-300 prose-a:text-purple-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-zinc-900 prose-blockquote:border-purple-500 prose-ol:list-decimal prose-ul:list-disc prose-li:text-zinc-300">
+                <MDEditor.Markdown
+                  source={project.content}
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: 'inherit'
+                  }}
+                />
+              </div>
             </div>
           )}
 
