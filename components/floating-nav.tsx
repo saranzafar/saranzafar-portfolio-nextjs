@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { Menu, X } from "lucide-react"
+import { LucideMenu as Menu, LucideX as X } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { useMobile } from "@/hooks/use-mobile"
@@ -83,12 +83,14 @@ export function FloatingNav() {
                   {item.name}
                 </Link>
               ))}
-              <Button
-                size="sm"
-                className="ml-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 border-0"
-              >
-                Resume
-              </Button>
+              <a href="/cv/saran-zafar-cv.pdf" download target="_blank" rel="noopener noreferrer">
+                <Button
+                  size="sm"
+                  className="ml-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 border-0"
+                >
+                  Resume
+                </Button>
+              </a>
             </div>
           )}
         </div>

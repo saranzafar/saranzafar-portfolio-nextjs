@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowRight, Github, Linkedin, Mail, Twitter, Edit } from "lucide-react"
+import { ArrowRight, Github, Linkedin, Mail, Edit, Download } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { ProjectCard } from "@/components/project-card"
@@ -223,9 +223,12 @@ export default function Portfolio() {
                   </div>
                 </div>
 
-                <div className="mt-8">
-                  <Button className="text-zinc-200 border border-zinc-600 bg-transparent">Download Resume</Button>
-                </div>
+                <a href="/cv/saran-zafar-cv.pdf" download target="_blank" rel="noopener noreferrer">
+                  <Button className="text-zinc-200 border border-zinc-600 bg-transparent">
+                    <Download className="w-4 h-4 mr-2" />
+                    Download Resume
+                  </Button>
+                </a>
               </GlassmorphicCard>
             </div>
           </div>
