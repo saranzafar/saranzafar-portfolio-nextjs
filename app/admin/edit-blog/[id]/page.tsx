@@ -21,6 +21,15 @@ import dynamic from "next/dynamic"
 
 const MDEditor = dynamic(() => import("@uiw/react-md-editor"), { ssr: false })
 
+function toSlug(input: string) {
+  return (input || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export default function EditBlogPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
@@ -28,6 +37,8 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
   const [isLoading, setIsLoading] = useState(false)
   const [imageUploading, setImageUploading] = useState(false)
   const [blogLoading, setBlogLoading] = useState(true)
+  const [category, setCategory] = useState<string>("");
+  const [featured, setFeatured] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -65,6 +76,9 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         featured_image: data.featured_image || "",
         published: data.published || false,
       })
+
+      setCategory(data.category ?? "");
+      setFeatured(!!data.featured);
     } catch (error) {
       console.error("Error fetching blog:", error)
       toast({
@@ -134,13 +148,21 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
         .map((tag) => tag.trim())
         .filter((tag) => tag.length > 0)
 
+      const categoryTrimmed = category.trim();
+
+      const updatePayload = {
+        ...formData,
+        tags: tagsArray,
+        category: categoryTrimmed || null,
+        category_slug: categoryTrimmed ? toSlug(categoryTrimmed) : null,
+        featured: !!featured,
+      };
+
+
       const { error } = await supabase
         .from("blogs")
-        .update({
-          ...formData,
-          tags: tagsArray,
-        })
-        .eq("id", id)
+        .update(updatePayload)
+        .eq("id", id);
 
       if (error) throw error
 
@@ -280,9 +302,18 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                       <Switch
                         id="published"
                         checked={formData.published}
-                        onCheckedChange={(checked) => setFormData({ ...formData, published: checked })}
+                        onCheckedChange={(checked: any) => setFormData({ ...formData, published: checked })}
                       />
-                      <Label htmlFor="published">Published</Label>
+                      <Label htmlFor="published">Publish immediately</Label>
+                    </div>
+
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="featured"
+                        checked={featured}
+                        onCheckedChange={setFeatured}
+                      />
+                      <Label htmlFor="featured">Featured Blog</Label>
                     </div>
 
                     <div className="space-y-2">
@@ -293,6 +324,19 @@ export default function EditBlogPage({ params }: { params: Promise<{ id: string 
                         onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                         className="bg-zinc-900/50 border-zinc-700"
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Category</label>
+                      <Input
+                        placeholder="e.g. Next.js"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="bg-zinc-900/50 border-zinc-700"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Free-form label. We’ll normalize it internally for filtering.
+                      </p>
                     </div>
 
                     <div className="space-y-2">

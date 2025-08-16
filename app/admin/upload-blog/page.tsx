@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Save } from "lucide-react"
 import dynamic from "next/dynamic"
@@ -20,11 +20,24 @@ import { AdminHeader } from "@/components/admin-header"
 // Dynamically import MDEditor to avoid SSR issues
 const MDEditor = dynamic(() => import('@uiw/react-md-editor'), { ssr: false })
 
+export function toSlug(input: string) {
+  return (input || "")
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
 export default function UploadBlogPage() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
   const [imageUploading, setImageUploading] = useState(false)
+
+  // Add to your existing state block
+  const [category, setCategory] = useState<string>("");
+  const [featured, setFeatured] = useState<boolean>(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -109,14 +122,23 @@ export default function UploadBlogPage() {
       const tagsArray = formData.tags
         .split(",")
         .map((tag) => tag.trim())
-        .filter((tag) => tag.length > 0)
+        .filter((tag) => tag.length > 0);
 
-      const { data, error } = await supabase.from("blogs").insert([
-        {
-          ...formData,
-          tags: tagsArray,
-        },
-      ])
+      const categoryTrimmed = category.trim();
+      const payload = {
+        ...formData,
+        tags: tagsArray,
+        category: categoryTrimmed || null,
+        category_slug: categoryTrimmed ? toSlug(categoryTrimmed) : null,
+        featured: !!featured,
+      };
+
+      // Optional guard: ensure slug exists
+      if (!payload.slug) {
+        payload.slug = generateSlug(payload.title);
+      }
+
+      const { data, error } = await supabase.from("blogs").insert([payload]).select("*");
 
       if (error) throw error
 
@@ -248,6 +270,15 @@ export default function UploadBlogPage() {
                       <Label htmlFor="published">Publish immediately</Label>
                     </div>
 
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        id="featured"
+                        checked={featured}
+                        onCheckedChange={setFeatured}
+                      />
+                      <Label htmlFor="featured">Featured Blog</Label>
+                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="author">Author</Label>
                       <Input
@@ -256,6 +287,19 @@ export default function UploadBlogPage() {
                         onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                         className="bg-zinc-900/50 border-zinc-700"
                       />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Category</label>
+                      <Input
+                        placeholder="e.g. Next.js"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="bg-zinc-900/50 border-zinc-700"
+                      />
+                      <p className="text-xs text-muted-foreground">
+                        Free-form label. We’ll normalize it internally for filtering.
+                      </p>
                     </div>
 
                     <div className="space-y-2">

@@ -1,38 +1,61 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Link from "next/link"
-import { Search, Calendar, User, Clock, Home } from "lucide-react"
+import { Search, Calendar, User, Clock, Home, Filter } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { SectionHeading } from "@/components/section-heading"
 import { GlassmorphicCard } from "@/components/glassmorphic-card"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 
+type Blog = {
+  id: string
+  title: string
+  slug: string
+  author: string
+  created_at: string
+  excerpt?: string | null
+  content?: string | null
+  tags: string[] | null
+  featured_image?: string | null
+  published: boolean
+  // optional fields we’ll filter on
+  category?: string | null
+  category_slug?: string | null
+  featured?: boolean | null
+}
+
 export default function BlogsPage() {
-  const [blogs, setBlogs] = useState<any[]>([])
-  const [filteredBlogs, setFilteredBlogs] = useState<any[]>([])
+  const [blogs, setBlogs] = useState<Blog[]>([])
   const [isLoading, setIsLoading] = useState(true)
+
+  // filters
   const [searchTerm, setSearchTerm] = useState("")
+  const [categoryFilter, setCategoryFilter] = useState<string>("all") // "all" | <category label>
+  const [featuredFilter, setFeaturedFilter] = useState<string>("all") // "all" | "featured" | "regular"
+  const [sortBy, setSortBy] = useState<string>("newest") // newest | oldest | title | author
+
+  // pagination
   const [currentPage, setCurrentPage] = useState(1)
-  const blogsPerPage = 6
+  const BLOGS_PER_PAGE = 9
 
   useEffect(() => {
     fetchBlogs()
   }, [])
 
   useEffect(() => {
-    filterBlogs()
-  }, [blogs, searchTerm])
+    setCurrentPage(1)
+  }, [searchTerm, categoryFilter, featuredFilter, sortBy])
 
   const fetchBlogs = async () => {
     if (!isSupabaseConfigured) {
       setIsLoading(false)
       return
     }
-
     try {
       const { data, error } = await supabase
         .from("blogs")
@@ -41,7 +64,7 @@ export default function BlogsPage() {
         .order("created_at", { ascending: false })
 
       if (error) throw error
-      setBlogs(data || [])
+      setBlogs((data || []) as Blog[])
     } catch (error) {
       console.error("Error fetching blogs:", error)
     } finally {
@@ -49,33 +72,72 @@ export default function BlogsPage() {
     }
   }
 
-  const filterBlogs = () => {
-    let filtered = blogs
+  // distinct, sorted category list with counts
+  const categories = useMemo(() => {
+    const map = new Map<string, number>()
+    blogs.forEach(b => {
+      const label = (b.category || "").trim()
+      if (label) map.set(label, (map.get(label) || 0) + 1)
+    })
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([label, count]) => ({ label, count }))
+  }, [blogs])
 
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (blog) =>
-          blog.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          blog.excerpt?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          blog.tags.some((tag: string) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
-      )
-    }
+  // filtered + sorted list
+  const filteredBlogs = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase()
 
-    setFilteredBlogs(filtered)
-    setCurrentPage(1)
-  }
+    let arr = blogs.filter(blog => {
+      const matchesSearch =
+        !q ||
+        blog.title.toLowerCase().includes(q) ||
+        (blog.excerpt?.toLowerCase().includes(q) ?? false) ||
+        ((blog.tags || []).some(tag => tag?.toLowerCase().includes(q)))
 
-  const readingTime = (content: string) => {
-    const wordsPerMinute = 200
-    const words = content.split(" ").length
-    return Math.ceil(words / wordsPerMinute)
-  }
+      const matchesCategory =
+        categoryFilter === "all" ||
+        (blog.category && blog.category.trim() === categoryFilter)
 
-  // Pagination
-  const totalPages = Math.ceil(filteredBlogs.length / blogsPerPage)
-  const startIndex = (currentPage - 1) * blogsPerPage
-  const endIndex = startIndex + blogsPerPage
+      const matchesFeatured =
+        featuredFilter === "all" ||
+        (featuredFilter === "featured" && !!blog.featured) ||
+        (featuredFilter === "regular" && !blog.featured)
+
+      return matchesSearch && matchesCategory && matchesFeatured
+    })
+
+    // sorting
+    arr.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        case "oldest":
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        case "title":
+          return a.title.localeCompare(b.title)
+        case "author":
+          return a.author.localeCompare(b.author)
+        default:
+          return 0
+      }
+    })
+
+    return arr
+  }, [blogs, searchTerm, categoryFilter, featuredFilter, sortBy])
+
+  // pagination
+  const totalPages = Math.max(1, Math.ceil(filteredBlogs.length / BLOGS_PER_PAGE))
+  const startIndex = (currentPage - 1) * BLOGS_PER_PAGE
+  const endIndex = startIndex + BLOGS_PER_PAGE
   const currentBlogs = filteredBlogs.slice(startIndex, endIndex)
+
+  const readingTime = (content?: string | null) => {
+    if (!content) return 1
+    const wordsPerMinute = 200
+    const words = content.trim().split(/\s+/).length
+    return Math.max(1, Math.ceil(words / wordsPerMinute))
+  }
 
   if (isLoading) {
     return (
@@ -90,9 +152,9 @@ export default function BlogsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
-      <div className="container py-32">
+      <div className="container p-4 md:py-32">
         {/* Header with Home Button */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-center md:justify-between flex-wrap gap-4 ">
           <SectionHeading title="Blog Posts" subtitle="Thoughts, tutorials, and insights" />
           <Link href="/">
             <Button variant="outline" className="border-zinc-700 hover:bg-zinc-800 bg-transparent">
@@ -102,16 +164,63 @@ export default function BlogsPage() {
           </Link>
         </div>
 
-        {/* Search */}
-        <div className="max-w-md mx-auto mt-16 mb-8">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-            <Input
-              placeholder="Search blog posts..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-zinc-900/50 border-zinc-700 focus:border-purple-500"
-            />
+        {/* Search + Filters */}
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between mt-8">
+          {/* Search */}
+          <div className="w-full lg:max-w-lg">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+              <Input
+                placeholder="Search blog posts by title, excerpt, or tag..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-zinc-900/50 border-zinc-700 focus:border-purple-500"
+              />
+            </div>
+          </div>
+
+          {/* Filters Row */}
+          <div className="flex flex-wrap gap-3">
+            {/* Category */}
+            <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+              <SelectTrigger className="w-44 bg-zinc-900/50 border-zinc-700 text-white">
+                <Filter className="h-4 w-4 mr-2" />
+                <SelectValue placeholder="Category" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200 max-h-72">
+                <SelectItem value="all">All Categories</SelectItem>
+                {categories.map(({ label, count }) => (
+                  <SelectItem key={label} value={label}>
+                    {label} ({count})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Featured */}
+            <Select value={featuredFilter} onValueChange={setFeaturedFilter}>
+              <SelectTrigger className="w-40 bg-zinc-900/50 border-zinc-700 text-white">
+                <SelectValue placeholder="Featured" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200">
+                <SelectItem value="all">All</SelectItem>
+                <SelectItem value="featured">Featured</SelectItem>
+                <SelectItem value="regular">Regular</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {/* Sort */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-40 bg-zinc-900/50 border-zinc-700 text-white">
+                <SelectValue placeholder="Sort" />
+              </SelectTrigger>
+              <SelectContent className="bg-zinc-800 border-zinc-700 text-zinc-200">
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+                <SelectItem value="title">Title A–Z</SelectItem>
+                <SelectItem value="author">Author A–Z</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
@@ -119,6 +228,7 @@ export default function BlogsPage() {
         <div className="mb-8">
           <p className="text-zinc-400 text-center">
             {filteredBlogs.length} {filteredBlogs.length === 1 ? "post" : "posts"} found
+            {filteredBlogs.length !== blogs.length ? ` (from ${blogs.length} total)` : ""}
           </p>
         </div>
 
@@ -126,10 +236,29 @@ export default function BlogsPage() {
         {currentBlogs.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-zinc-400 mb-4">No blog posts found.</p>
-            {searchTerm && (
-              <Button onClick={() => setSearchTerm("")} variant="outline" className="border-zinc-700 hover:bg-zinc-800">
-                Clear Search
-              </Button>
+            {(searchTerm || categoryFilter !== "all" || featuredFilter !== "all") && (
+              <div className="flex gap-2 justify-center">
+                <Button
+                  onClick={() => setSearchTerm("")}
+                  variant="outline"
+                  className="border-zinc-700 hover:bg-zinc-800"
+                >
+                  Clear Search
+                </Button>
+                {(categoryFilter !== "all" || featuredFilter !== "all") && (
+                  <Button
+                    onClick={() => {
+                      setCategoryFilter("all")
+                      setFeaturedFilter("all")
+                      setSortBy("newest")
+                    }}
+                    variant="outline"
+                    className="border-zinc-700 hover:bg-zinc-800"
+                  >
+                    Reset Filters
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         ) : (
@@ -148,15 +277,23 @@ export default function BlogsPage() {
                   )}
 
                   <div className="space-y-3">
+                    {/* Category + Tags */}
                     <div className="flex flex-wrap gap-2">
-                      {blog.tags.slice(0, 3).map((tag: string) => (
+                      {blog.category ? (
+                        <Badge variant="outline" className="text-xs">
+                          {blog.category}
+                        </Badge>
+                      ) : null}
+                      {(blog.tags || []).slice(0, 3).map((tag) => (
                         <Badge key={tag} variant="outline" className="text-xs">
                           {tag}
                         </Badge>
                       ))}
                     </div>
 
-                    <h3 className="text-xl font-bold group-hover:text-purple-400 transition-colors">{blog.title}</h3>
+                    <h3 className="text-xl font-bold group-hover:text-purple-400 transition-colors">
+                      {blog.title}
+                    </h3>
 
                     {blog.excerpt && <p className="text-zinc-400 line-clamp-3">{blog.excerpt}</p>}
 
@@ -184,11 +321,11 @@ export default function BlogsPage() {
         )}
 
         {/* Pagination */}
-        {totalPages > 1 && (
+        {filteredBlogs.length > 0 && totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 mt-12">
             <Button
               variant="outline"
-              onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
               className="border-zinc-700 hover:bg-zinc-800"
             >
@@ -196,23 +333,23 @@ export default function BlogsPage() {
             </Button>
 
             <div className="flex gap-2">
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <Button
-                  key={page}
-                  variant={currentPage === page ? "default" : "outline"}
-                  onClick={() => setCurrentPage(page)}
-                  className={
-                    currentPage === page ? "bg-purple-600 hover:bg-purple-700" : "border-zinc-700 hover:bg-zinc-800"
-                  }
-                >
-                  {page}
-                </Button>
-              ))}
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+                .map(page => (
+                  <Button
+                    key={page}
+                    variant={currentPage === page ? "default" : "outline"}
+                    onClick={() => setCurrentPage(page)}
+                    className={currentPage === page ? "bg-purple-600 hover:bg-purple-700" : "border-zinc-700 hover:bg-zinc-800"}
+                  >
+                    {page}
+                  </Button>
+                ))}
             </div>
 
             <Button
               variant="outline"
-              onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
               className="border-zinc-700 hover:bg-zinc-800"
             >
