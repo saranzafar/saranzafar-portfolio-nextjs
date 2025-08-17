@@ -4,12 +4,11 @@ import { useState, useEffect } from "react"
 import Link from "next/link"
 import { ArrowLeft, Calendar, User, Clock, Tag, Copy, Share2, Twitter, Linkedin, Facebook, MessageCircleReply } from "lucide-react"
 import MDEditor from '@uiw/react-md-editor'
-import { } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
-import { useToast } from "@/hooks/use-toast" // ✅ if you have your toast hook
+import { useToast } from "@/hooks/use-toast"
 
 interface BlogDetailPageProps {
   params: Promise<{ slug: string }>
@@ -60,7 +59,6 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
 
   const currentUrl = typeof window !== "undefined" ? window.location.href : ""
 
-  // ✅ Copy link to clipboard
   const handleCopy = () => {
     navigator.clipboard.writeText(currentUrl)
     toast({
@@ -69,12 +67,11 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
     })
   }
 
-  // ✅ Social share links
   const shareLinks = {
     twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(blog?.title)}`,
     linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`,
     facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`,
-    whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(blog?.title + " " + currentUrl)}`,
+    whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent((blog?.title ?? "") + " " + currentUrl)}`,
   }
 
   if (isLoading) {
@@ -100,6 +97,18 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
 
         {/* Blog Content */}
         <div className="max-w-4xl mx-auto">
+          {/* ✅ Featured Image (restored) */}
+          {blog.featured_image && (
+            <div className="relative overflow-hidden rounded-xl mb-8">
+              <img
+                src={blog.featured_image || "/placeholder.svg"}
+                alt={blog.title}
+                className="w-full h-64 md:h-96 object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+            </div>
+          )}
+
           {/* Title */}
           <h1 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-white to-zinc-300">
             {blog.title}
@@ -122,48 +131,55 @@ export default function BlogDetailPage({ params }: BlogDetailPageProps) {
             </div>
           </div>
 
+          {/* Optional Tags */}
+          {Array.isArray(blog.tags) && blog.tags.length > 0 && (
+            <div className="flex items-center gap-2 mb-8">
+              <Tag className="h-4 w-4 text-zinc-500" />
+              <div className="flex flex-wrap gap-2">
+                {blog.tags.map((t: string) => (
+                  <Badge key={t} variant="outline" className="text-xs">{t}</Badge>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Content */}
           <div className="prose prose-invert prose-lg max-w-none">
-            <MDEditor.Markdown source={blog.content} style={{ backgroundColor: "transparent", color: "inherit" }} />
+            <MDEditor.Markdown
+              source={blog.content}
+              style={{ backgroundColor: "transparent", color: "inherit" }}
+            />
           </div>
 
-          {/* ✅ Share Buttons */}
+          {/* Share Buttons */}
           <div className="mt-12 border-t border-zinc-800 pt-8">
             <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
               <Share2 className="h-4 w-4" /> Share this post
             </h3>
             <div className="flex flex-wrap gap-3">
-              {/* Copy Link */}
               <Button onClick={handleCopy} variant="outline" className="border-zinc-700 hover:bg-zinc-800 flex items-center gap-2">
                 <Copy className="h-4 w-4" />
                 Copy
               </Button>
 
-              {/* Twitter */}
               <Link href={shareLinks.twitter} target="_blank">
                 <Button className="bg-sky-500 hover:bg-sky-600 flex items-center gap-2">
-                  <Twitter className="h-4 w-4" />
-                  Twitter
+                  <Twitter className="h-4 w-4" /> Twitter
                 </Button>
               </Link>
 
-              {/* LinkedIn */}
               <Link href={shareLinks.linkedin} target="_blank">
                 <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
-                  <Linkedin className="h-4 w-4" />
-                  LinkedIn
+                  <Linkedin className="h-4 w-4" /> LinkedIn
                 </Button>
               </Link>
 
-              {/* Facebook */}
               <Link href={shareLinks.facebook} target="_blank">
                 <Button className="bg-blue-700 hover:bg-blue-800 flex items-center gap-2">
-                  <Facebook className="h-4 w-4" />
-                  Facebook
+                  <Facebook className="h-4 w-4" /> Facebook
                 </Button>
               </Link>
 
-              {/* WhatsApp */}
               <Link href={shareLinks.whatsapp} target="_blank">
                 <Button className="bg-green-600 hover:bg-green-700 flex items-center gap-2">
                   <MessageCircleReply className="h-4 w-4" />
