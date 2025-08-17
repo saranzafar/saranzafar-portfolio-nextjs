@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { ArrowLeft, ExternalLink, Github, Calendar, Tag } from "lucide-react"
+import { ArrowLeft, ExternalLink, Github, Calendar, Tag, Share2, Copy, Twitter, Linkedin, Facebook, MessageCircleReply } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { supabase, isSupabaseConfigured } from "@/lib/supabase"
 import MDEditor from '@uiw/react-md-editor'
+import { useToast } from "@/hooks/use-toast" // ✅ for toast when copying link
 
 interface ProjectDetailPageProps {
   params: Promise<{ slug: string }>
@@ -17,6 +18,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
   const [project, setProject] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [slug, setSlug] = useState<string>("")
+  const { toast } = useToast()
 
   useEffect(() => {
     const getParams = async () => {
@@ -32,7 +34,6 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
       setIsLoading(false)
       return
     }
-
     try {
       const { data, error } = await supabase
         .from("projects")
@@ -48,6 +49,25 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const currentUrl = typeof window !== "undefined" ? window.location.href : ""
+
+  // ✅ Copy link to clipboard
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentUrl)
+    toast({
+      title: "Link copied!",
+      description: "You can now share it anywhere.",
+    })
+  }
+
+  // ✅ Social share links
+  const shareLinks = {
+    twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(project?.title)}`,
+    linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`,
+    facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentUrl)}`,
+    whatsapp: `https://api.whatsapp.com/send?text=${encodeURIComponent(project?.title + " " + currentUrl)}`,
   }
 
   if (isLoading) {
@@ -136,16 +156,16 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
           <div className="flex flex-wrap gap-4 mb-8">
             {project.demo_url && (
               <Link href={project.demo_url} target="_blank" rel="noopener noreferrer">
-                <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500">
-                  <ExternalLink className="h-4 w-4 mr-2" />
+                <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-pink-500 hover:to-purple-500 flex items-center gap-2">
+                  <ExternalLink className="h-4 w-4" />
                   Live Demo
                 </Button>
               </Link>
             )}
             {project.repo_url && (
               <Link href={project.repo_url} target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="border-zinc-700 hover:bg-zinc-800 bg-transparent">
-                  <Github className="h-4 w-4 mr-2" />
+                <Button variant="outline" className="border-zinc-700 hover:bg-zinc-800 bg-transparent flex items-center gap-2">
+                  <Github className="h-4 w-4" />
                   View Code
                 </Button>
               </Link>
@@ -161,9 +181,7 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               </h3>
               <div className="flex flex-wrap gap-2">
                 {project.technologies.map((tech: string) => (
-                  <Badge key={tech} variant="secondary" className="">
-                    {tech}
-                  </Badge>
+                  <Badge key={tech} variant="secondary">{tech}</Badge>
                 ))}
               </div>
             </div>
@@ -176,14 +194,44 @@ export default function ProjectDetailPage({ params }: ProjectDetailPageProps) {
               <div className="prose prose-invert prose-lg max-w-none prose-headings:text-white prose-p:text-zinc-300 prose-a:text-purple-400 prose-strong:text-white prose-code:text-purple-300 prose-pre:bg-zinc-900 prose-blockquote:border-purple-500 prose-ol:list-decimal prose-ul:list-disc prose-li:text-zinc-300">
                 <MDEditor.Markdown
                   source={project.content}
-                  style={{
-                    backgroundColor: 'transparent',
-                    color: 'inherit'
-                  }}
+                  style={{ backgroundColor: "transparent", color: "inherit" }}
                 />
               </div>
             </div>
           )}
+
+          {/* ✅ Share Buttons */}
+          <div className="mt-12 border-t border-zinc-800 pt-8">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Share2 className="h-4 w-4" /> Share this project
+            </h3>
+            <div className="flex flex-wrap gap-3">
+              <Button onClick={handleCopy} variant="outline" className="border-zinc-700 hover:bg-zinc-800 flex items-center gap-2">
+                <Copy className="h-4 w-4" />
+                Copy
+              </Button>
+              <Link href={shareLinks.twitter} target="_blank">
+                <Button className="bg-sky-500 hover:bg-sky-600 flex items-center gap-2">
+                  <Twitter className="h-4 w-4" /> Twitter
+                </Button>
+              </Link>
+              <Link href={shareLinks.linkedin} target="_blank">
+                <Button className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
+                  <Linkedin className="h-4 w-4" /> LinkedIn
+                </Button>
+              </Link>
+              <Link href={shareLinks.facebook} target="_blank">
+                <Button className="bg-blue-700 hover:bg-blue-800 flex items-center gap-2">
+                  <Facebook className="h-4 w-4" /> Facebook
+                </Button>
+              </Link>
+              <Link href={shareLinks.whatsapp} target="_blank">
+                <Button className="bg-green-600 hover:bg-green-700 flex items-center gap-2">
+                  <MessageCircleReply className="h-4 w-4" /> WhatsApp
+                </Button>
+              </Link>
+            </div>
+          </div>
 
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-zinc-800">
