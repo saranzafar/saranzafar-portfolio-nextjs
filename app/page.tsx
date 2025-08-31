@@ -37,7 +37,7 @@ export default function Portfolio() {
         .eq("published", true)
         .order("featured", { ascending: false })
         .order("created_at", { ascending: false })
-        .limit(6)
+        .limit(3)
 
       // Fetch 3 recent blogs
       const { data: blogs } = await supabase
@@ -262,7 +262,7 @@ export default function Portfolio() {
           <SectionHeading title="Featured Projects" subtitle="Some of my recent work" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16">
-            {featuredProjects.map((project) => (
+            {featuredProjects?.map((project) => (
               <ProjectCard
                 key={project.id}
                 title={project.title}
