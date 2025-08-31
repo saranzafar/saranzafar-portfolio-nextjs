@@ -112,7 +112,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className="dark antialiased scroll-smooth">
+    <html lang="en" className="antialiased scroll-smooth">
       <body className={poppins.className}>
         <AuthProvider>
           <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>

@@ -192,7 +192,7 @@ export default function ClientBlogDetailPage({ params }: BlogDetailPageProps) {
             </Head>
 
             <div className="min-h-screen bg-gradient-to-b from-zinc-900 via-zinc-900 to-black text-white">
-                <div className="container py-32">
+                <div className="">
                     {/* Back Button */}
                     <div className="mb-8">
                         <Link href="/blogs">
@@ -207,7 +207,7 @@ export default function ClientBlogDetailPage({ params }: BlogDetailPageProps) {
                     </div>
 
                     {/* Content */}
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-5xl mx-auto">
                         {/* Featured Image */}
                         {blog.featured_image && (
                             <div className="relative overflow-hidden rounded-xl mb-8 group">
